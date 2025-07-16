@@ -84,7 +84,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
       toast({
         title: "OTP Sent!",
-        description: `Verification code sent to ${data.countryCode}${data.phone}`,
+        description: `Verification code sent to ${data.countryCode}${data.phone} currently set to ${otp}.`,
       })
 
       onSuccess(data.phone, data.countryCode, otp)

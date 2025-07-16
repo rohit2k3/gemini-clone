@@ -1,37 +1,40 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react"
-import { simulateOTPVerification, simulateOTPSend } from "@/lib/utils/otp"
-import { useAuthStore } from "@/lib/stores/auth-store"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { simulateOTPVerification, simulateOTPSend } from "@/lib/utils/otp";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useToast } from "@/hooks/use-toast";
 
 const otpSchema = z.object({
-  otp: z.string().length(6, "OTP must be exactly 6 digits").regex(/^\d+$/, "OTP must contain only digits"),
-})
+  otp: z
+    .string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d+$/, "OTP must contain only digits"),
+});
 
-type OTPFormData = z.infer<typeof otpSchema>
+type OTPFormData = z.infer<typeof otpSchema>;
 
 interface OTPFormProps {
-  phoneData: { phone: string; countryCode: string; otp: string }
-  onBack: () => void
+  phoneData: { phone: string; countryCode: string; otp: string };
+  onBack: () => void;
 }
 
 export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isResending, setIsResending] = useState(false)
-  const [countdown, setCountdown] = useState(30)
-  const [currentOTP, setCurrentOTP] = useState(phoneData.otp)
-  const { login } = useAuthStore()
-  const { toast } = useToast()
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [currentOTP, setCurrentOTP] = useState(phoneData.otp);
+  const { login } = useAuthStore();
+  const { toast } = useToast();
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
     register,
@@ -42,56 +45,56 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
   } = useForm<OTPFormData>({
     resolver: zodResolver(otpSchema),
     mode: "onChange",
-  })
+  });
 
-  const otpValue = watch("otp") || ""
+  const otpValue = watch("otp") || "";
 
   // Countdown timer
   useEffect(() => {
     if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-  }, [countdown])
+  }, [countdown]);
 
   // Handle OTP input changes
   const handleOTPChange = (index: number, value: string) => {
     if (value.length > 1) {
       // Handle paste
-      const pastedValue = value.slice(0, 6)
-      setValue("otp", pastedValue, { shouldValidate: true })
+      const pastedValue = value.slice(0, 6);
+      setValue("otp", pastedValue, { shouldValidate: true });
 
       // Focus the last filled input or the next empty one
-      const nextIndex = Math.min(pastedValue.length - 1, 5)
-      inputRefs.current[nextIndex]?.focus()
-      return
+      const nextIndex = Math.min(pastedValue.length - 1, 5);
+      inputRefs.current[nextIndex]?.focus();
+      return;
     }
 
     // Handle single character input
-    const newOTP = otpValue.split("")
-    newOTP[index] = value
-    const updatedOTP = newOTP.join("").slice(0, 6)
+    const newOTP = otpValue.split("");
+    newOTP[index] = value;
+    const updatedOTP = newOTP.join("").slice(0, 6);
 
-    setValue("otp", updatedOTP, { shouldValidate: true })
+    setValue("otp", updatedOTP, { shouldValidate: true });
 
     // Move to next input
     if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
+      inputRefs.current[index + 1]?.focus();
     }
-  }
+  };
 
   // Handle backspace
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !otpValue[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+      inputRefs.current[index - 1]?.focus();
     }
-  }
+  };
 
   const onSubmit = async (data: OTPFormData) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const isValid = await simulateOTPVerification(data.otp, currentOTP)
+      const isValid = await simulateOTPVerification(data.otp, currentOTP);
 
       if (isValid) {
         const user = {
@@ -99,56 +102,61 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
           phone: phoneData.phone,
           countryCode: phoneData.countryCode,
           createdAt: new Date().toISOString(),
-        }
+        };
 
-        login(user)
+        login(user);
 
         toast({
           title: "Success!",
           description: "You have been logged in successfully.",
-        })
+        });
       } else {
         toast({
           title: "Invalid OTP",
-          description: "The verification code you entered is incorrect. Please try again.",
+          description:
+            "The verification code you entered is incorrect. Please try again.",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to verify OTP. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleResendOTP = async () => {
-    setIsResending(true)
+    setIsResending(true);
 
     try {
-      const newOTP = await simulateOTPSend(phoneData.phone, phoneData.countryCode)
-      setCurrentOTP(newOTP)
-      setCountdown(30)
-      setValue("otp", "", { shouldValidate: true })
-      inputRefs.current[0]?.focus()
+      const newOTP = await simulateOTPSend(
+        phoneData.phone,
+        phoneData.countryCode
+      );
+      setCurrentOTP(newOTP);
+      setCountdown(30);
+      setValue("otp", "", { shouldValidate: true });
+      inputRefs.current[0]?.focus();
 
       toast({
         title: "OTP Resent!",
-        description: `New verification code sent to ${phoneData.countryCode}${phoneData.phone}`,
-      })
+        description: `New verification code sent to ${phoneData.countryCode}${phoneData.phone} currently set to ${newOTP}.`,
+      });
+
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to resend OTP. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsResending(false)
+      setIsResending(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -185,11 +193,19 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
               />
             ))}
           </div>
-          {errors.otp && <p className="text-sm text-destructive text-center">{errors.otp.message}</p>}
+          {errors.otp && (
+            <p className="text-sm text-destructive text-center">
+              {errors.otp.message}
+            </p>
+          )}
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" className="w-full" disabled={!isValid || isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!isValid || isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -204,9 +220,17 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
       {/* Resend OTP */}
       <div className="text-center">
         {countdown > 0 ? (
-          <p className="text-sm text-muted-foreground">Resend code in {countdown}s</p>
+          <p className="text-sm text-muted-foreground">
+            Resend code in {countdown}s
+          </p>
         ) : (
-          <Button type="button" variant="ghost" onClick={handleResendOTP} disabled={isResending} className="text-sm">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleResendOTP}
+            disabled={isResending}
+            className="text-sm"
+          >
             {isResending ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -220,13 +244,11 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
       </div>
 
       {/* Development Helper */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="mt-4 p-3 bg-muted rounded-md">
-          <p className="text-xs text-muted-foreground">
-            Development: Current OTP is <strong>{currentOTP}</strong>
-          </p>
-        </div>
-      )}
+      <div className="mt-4 p-3 bg-muted rounded-md">
+        <p className="text-xs text-muted-foreground">
+          Development: Current OTP is <strong>{currentOTP}</strong>
+        </p>
+      </div>
     </div>
-  )
+  );
 }
