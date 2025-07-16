@@ -12,6 +12,22 @@ import { fetchCountries, type CountryOption } from "@/lib/api/countries"
 import { simulateOTPSend } from "@/lib/utils/otp"
 import { useToast } from "@/hooks/use-toast"
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import { Check, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+
 const loginSchema = z.object({
   countryCode: z.string().min(1, "Please select a country"),
   phone: z
@@ -37,6 +53,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
@@ -107,11 +124,12 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <label className="text-sm font-medium">Country</label>
         <Select
           value={selectedCountryCode}
+          key={selectedCountryCode}
           onValueChange={(value) => setValue("countryCode", value, { shouldValidate: true })}
           disabled={isLoadingCountries}
         >
-          <SelectTrigger>
-            <SelectValue placeholder={isLoadingCountries ? "Loading countries..." : "Select country"}>
+          <SelectTrigger className="w-full ">
+            <SelectValue key={selectedCountryCode} placeholder={isLoadingCountries ? "Loading countries..." : "Select country"}>
               {selectedCountry && (
                 <div className="flex items-center gap-2">
                   <span>{selectedCountry.flag}</span>
@@ -121,7 +139,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               )}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="max-h-60">
+          <SelectContent className="max-h-60 bg-primary-foreground">
             {countries.map((country) => (
               <SelectItem key={country.code} value={country.dialCode}>
                 <div className="flex items-center gap-2">

@@ -93,7 +93,7 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
     try {
       const isValid = await simulateOTPVerification(data.otp, currentOTP)
 
-      if (!isValid) {
+      if (isValid) {
         const user = {
           id: Date.now().toString(),
           phone: phoneData.phone,
@@ -171,7 +171,9 @@ export default function OTPForm({ phoneData, onBack }: OTPFormProps) {
             {[0, 1, 2, 3, 4, 5].map((index) => (
               <Input
                 key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
                 type="text"
                 inputMode="numeric"
                 maxLength={6}

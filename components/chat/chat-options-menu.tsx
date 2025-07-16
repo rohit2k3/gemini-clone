@@ -12,9 +12,10 @@ import { useChatStore } from "@/lib/stores/chat-store"
 interface ChatOptionsMenuProps {
   chatroom: Chatroom
   onDelete: (id: string, title: string) => void
+  onRename?: (id: string, newTitle: string) => void
 }
 
-export default function ChatOptionsMenu({ chatroom, onDelete }: ChatOptionsMenuProps) {
+export default function ChatOptionsMenu({ chatroom, onDelete, onRename }: ChatOptionsMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const [newTitle, setNewTitle] = useState(chatroom.title)
