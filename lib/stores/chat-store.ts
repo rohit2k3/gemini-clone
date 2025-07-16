@@ -92,7 +92,7 @@ export const useChatStore = create<ChatState>()(
       searchQuery: "",
 
       createChatroom: (title: string) => {
-        const id = Date.now().toString()
+        const id = Date.now().toString() + Math.random().toString(36).substring(2, 10) // Unique ID
         const newChatroom: Chatroom = {
           id,
           title,

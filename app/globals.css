@@ -241,6 +241,7 @@
   @apply focus:ring-2 focus:ring-primary/20;
   @apply transition-all duration-200;
   background: rgb(var(--muted) / 0.5);
+  padding-left: 40px; /* For search icon */
 }
 
 .gemini-input:focus {

@@ -66,7 +66,7 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
       description: `"${title}" is ready to use.`,
     });
 
-    router.push(`dashboard/chat/${chatroomId}`);
+    router.push(`/dashboard/chat/${chatroomId}`);
   };
 
   const handleDeleteChatroom = (id: string, title: string) => {
@@ -87,16 +87,58 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <>
+      {/* Mobile Toggle Button */}
+      {!sidebarOpen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed items-center top-4 left-4 z-50 lg:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle sidebar</span>
+        </Button>
+      )}
+
       {/* Sidebar */}
       <div
-        className={`w-80 flex-shrink-0 border-r border-border/50 bg-card/30 backdrop-blur-sm ${sidebarOpen ? "block" : "hidden"} lg:block`}
+        className={`w-80 flex-shrink-0 border-r border-border/50 bg-card/30 backdrop-blur-sm transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0 z-40" : "-translate-x-full"
+        } lg:translate-x-0 lg:block fixed lg:static inset-y-0 left-0 z-40 lg:z-auto`}
       >
-        <div className="h-full flex flex-col">
+        {/* Mobile backdrop overlay */}
+        <div
+          className={`fixed inset-0 bg-black/50 transition-opacity duration-300 lg:hidden ${
+            sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setSidebarOpen(false)}
+        />
+
+        <div className="h-full flex flex-col relative bg-card/30 backdrop-blur-sm">
           {/* Sidebar Header */}
           <div className="p-6 border-b border-border/50">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="gemini-logo"></div>
-              <span className="text-title-large font-medium">Gemini</span>
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="gemini-logo"></div>
+                <span className="text-title-large font-medium">Gemini</span>
+              </div>
+              {/* Close button for mobile */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </Button>
             </div>
 
             <Button
@@ -134,37 +176,55 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
               </div>
             ) : (
               <div className="p-2">
-                {filteredChatrooms.map((chatroom) => (
-                  <div
-                    key={chatroom.id}
-                    className={`p-4 rounded-xl cursor-pointer transition-all group relative ${
-                      chatroom.id === unwrappedParams.id 
-                        ? "bg-primary/10 border border-primary/20" 
-                        : "hover:bg-muted/30"
-                    }`}
-                    onClick={() => router.push(`/dashboard/chat/${chatroom.id}`)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-body-large font-medium truncate mb-1">{chatroom.title}</h3>
-                        {chatroom.lastMessage && (
-                          <p className="text-body-medium text-muted-foreground truncate">{chatroom.lastMessage}</p>
-                        )}
+                {filteredChatrooms.map((chatroom) => {
+                  const isSelected = chatroom.id === unwrappedParams.id;
+
+                  return (
+                    <div
+                      key={chatroom.id}
+                      className={`p-4 rounded-xl cursor-pointer transition-all group relative ${
+                        isSelected
+                          ? "bg-primary/10 border border-primary/20"
+                          : "hover:bg-muted/30"
+                      }`}
+                      onClick={() => {
+                        router.push(`/dashboard/chat/${chatroom.id}`);
+                        // Close sidebar on mobile after selecting a chat
+                        if (window.innerWidth < 1024) {
+                          setSidebarOpen(false);
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-body-large font-medium truncate mb-1">
+                            {chatroom.title}
+                          </h3>
+                          {chatroom.lastMessage && (
+                            <p className="text-body-medium text-muted-foreground truncate">
+                              {chatroom.lastMessage}
+                            </p>
+                          )}
+                        </div>
+                        <ChatOptionsMenu
+                          chatroom={chatroom}
+                          onRename={(id, newTitle) => {
+                            // We'll implement this in the store
+                            const updatedChatrooms = chatrooms.map((room) =>
+                              room.id === id
+                                ? { ...room, title: newTitle }
+                                : room
+                            );
+                            // Update the store - we'll add this method
+                          }}
+                          onDelete={(id, title) =>
+                            handleDeleteChatroom(id, title)
+                          }
+                        />
                       </div>
-                      <ChatOptionsMenu
-                        chatroom={chatroom}
-                        onRename={(id, newTitle) => {
-                          // We'll implement this in the store
-                          const updatedChatrooms = chatrooms.map((room) =>
-                            room.id === id ? { ...room, title: newTitle } : room,
-                          )
-                          // Update the store - we'll add this method
-                        }}
-                        onDelete={(id, title) => handleDeleteChatroom(id, title)}
-                      />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -193,8 +253,19 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
                   <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 </Button>
 
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="w-8 h-8 hover:bg-muted/50">
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleLogout}
+                  className="w-8 h-8 hover:bg-muted/50"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
                   </svg>
                 </Button>
