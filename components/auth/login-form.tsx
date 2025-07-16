@@ -12,21 +12,6 @@ import { fetchCountries, type CountryOption } from "@/lib/api/countries"
 import { simulateOTPSend } from "@/lib/utils/otp"
 import { useToast } from "@/hooks/use-toast"
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command"
-import { Check, ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utils"
-
 
 const loginSchema = z.object({
   countryCode: z.string().min(1, "Please select a country"),
@@ -68,8 +53,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       try {
         const countryData = await fetchCountries()
         setCountries(countryData)
-        // Set default to US
-        const defaultCountry = countryData.find((c) => c.code === "US") || countryData[0]
+        const defaultCountry = countryData.find((c) => c.code === "IN") || countryData[0]
         if (defaultCountry) {
           setValue("countryCode", defaultCountry.dialCode)
         }
