@@ -192,21 +192,9 @@ const { theme, setTheme } = useTheme();
 - **React Hook Form** - Form handling
 - **Zod** - Schema validation
 
-### **Development Tools**
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
-- **Autoprefixer** - CSS vendor prefixes
-
 ---
 
 ## 🔧 Configuration
-
-### Environment Variables
-```env
-# Add your environment variables here
-NEXT_PUBLIC_API_URL=your_api_url
-NEXT_PUBLIC_APP_URL=your_app_url
-```
 
 ### Customization
 - **Colors**: Modify `tailwind.config.js` for custom color schemes
@@ -244,21 +232,7 @@ NEXT_PUBLIC_APP_URL=your_app_url
 
 ---
 
-## 🤝 Contributing
 
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit changes** (`git commit -m 'Add AmazingFeature'`)
-4. **Push to branch** (`git push origin feature/AmazingFeature`)
-5. **Open a Pull Request**
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 Acknowledgments
 
@@ -267,14 +241,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Radix UI** - Accessible components
 - **Tailwind CSS** - Utility-first styling
 - **Zustand** - State management
-
----
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/rohit2k3/gemini-clone/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rohit2k3/gemini-clone/discussions)
-- **Email**: [support@example.com](mailto:support@example.com)
 
 ---
 
