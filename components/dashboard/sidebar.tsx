@@ -21,12 +21,24 @@ import ChatOptionsMenu from "../chat/chat-options-menu";
 import { useTheme } from "next-themes";
 import CreateChatroomDialog from "./create-chatroom-dialog";
 
-const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
+const Sidebar = ({ 
+  params, 
+  sidebarOpen, 
+  setSidebarOpen 
+}: { 
+  params: Promise<{ id: string }>;
+  sidebarOpen?: boolean;
+  setSidebarOpen?: (open: boolean) => void;
+}) => {
   const unwrappedParams = React.use(params);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [localSidebarOpen, setLocalSidebarOpen] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Use external state if provided, otherwise use local state
+  const currentSidebarOpen = sidebarOpen !== undefined ? sidebarOpen : localSidebarOpen;
+  const currentSetSidebarOpen = setSidebarOpen !== undefined ? setSidebarOpen : setLocalSidebarOpen;
 
   const { user, logout } = useAuthStore();
   const {
@@ -88,12 +100,12 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
   return (
     <>
       {/* Mobile Toggle Button */}
-      {!sidebarOpen && (
+      {!currentSidebarOpen && (
         <Button
           variant="ghost"
           size="icon"
           className="fixed items-center top-4 left-4 z-50 lg:hidden"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={() => currentSetSidebarOpen(!currentSidebarOpen)}
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle sidebar</span>
@@ -111,7 +123,7 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
           className={`fixed inset-0 bg-black/50 transition-opacity duration-300 lg:hidden ${
             sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => currentSetSidebarOpen(false)}
         />
 
         <div className="h-full flex flex-col relative bg-card/30 backdrop-blur-sm">
@@ -127,7 +139,7 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
                 variant="ghost"
                 size="icon"
                 className="lg:hidden"
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => currentSetSidebarOpen(false)}
               >
                 <svg
                   className="h-5 w-5"
@@ -191,7 +203,7 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
                         router.push(`/dashboard/chat/${chatroom.id}`);
                         // Close sidebar on mobile after selecting a chat
                         if (window.innerWidth < 1024) {
-                          setSidebarOpen(false);
+                          currentSetSidebarOpen(false);
                         }
                       }}
                     >

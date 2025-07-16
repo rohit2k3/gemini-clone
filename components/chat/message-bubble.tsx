@@ -16,24 +16,44 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   const { toast } = useToast()
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(message.content)
-      setCopied(true)
-
+  try {
+    if (!message.content?.trim()) {
       toast({
-        title: "Copied to clipboard",
-        description: "Message copied successfully.",
+        title: "Nothing to copy",
+        description: "This message doesn't contain any text.",
       })
-
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy message to clipboard.",
-        variant: "destructive",
-      })
+      return
     }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(message.content)
+    } else {
+      const textarea = document.createElement("textarea")
+      textarea.value = message.content
+      textarea.style.position = "fixed" 
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textarea)
+    }
+
+    setCopied(true)
+    toast({
+      title: "Copied to clipboard",
+      description: "Message copied successfully.",
+    })
+
+    setTimeout(() => setCopied(false), 2000)
+  } catch (error) {
+    console.error("Clipboard error:", error)
+    toast({
+      title: "Failed to copy",
+      description: "Could not copy message to clipboard.",
+      variant: "destructive",
+    })
   }
+}
 
   const isUser = message.sender === "user"
 
@@ -48,7 +68,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       <div className={`flex flex-col max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
         {/* Message Content */}
         <div
-          className={`relative px-5 py-4 ${isUser ? "user-message ml-auto bg-primary text-primary-foreground" : "ai-message bg-muted/50 border border-border/30"}`}
+          className={`relative px-5 py-4 ${isUser ? "user-message ml-auto bg-primary-foreground text-primary-foreground" : "ai-message bg-muted/50 border border-border/30"}`}
         >
           {/* Copy Button - Only show for AI messages */}
           {!isUser && (

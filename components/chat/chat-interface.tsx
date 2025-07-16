@@ -3,7 +3,7 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Paperclip, Send } from "lucide-react";
+import { MoreVertical, Paperclip, Send, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/stores/chat-store";
 import { useAuthStore } from "@/lib/stores/auth-store";
@@ -18,9 +18,10 @@ import MessageSkeleton from "./message-skeleton";
 
 interface ChatInterfaceProps {
   chatId: string;
+  onToggleSidebar?: () => void;
 }
 
-export default function ChatInterface({ chatId }: ChatInterfaceProps) {
+export default function ChatInterface({ chatId, onToggleSidebar }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -179,15 +180,24 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className=" border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
+    <div className="h-full bg-background flex flex-col">
+      {/* Header */}
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 sm:pt-2">
-                <div className="ml-9 flex items-center gap-3">
+              <div className="flex items-center gap-3">
+                {/* Mobile hamburger menu */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={onToggleSidebar}
+                >
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle sidebar</span>
+                </Button>
+                
+                <div className="flex items-center gap-3">
                   <div className="gemini-logo w-8 h-8"></div>
                   <div>
                     <h1 className="text-body-large font-medium">
@@ -212,7 +222,7 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
           ref={messagesContainerRef}
           className="flex-1 overflow-y-auto custom-scrollbar"
         >
-          <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="max-w-4xl mx-auto px-4 py-6 pb-32">
             {isLoading && (
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
@@ -248,7 +258,7 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
         </div>
 
         {/* Input Area */}
-        <div className="fixed bottom-0 right-0 w-full border-t border-border/50 bg-background/80 backdrop-blur-sm z-10">
+        <div className="border-t border-border/50 bg-background/80 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
             {/* Selected Image Preview */}
             {selectedImage && (
@@ -334,7 +344,6 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
             </p>
           </div>
         </div>
-      </div>
     </div>
   );
 }
