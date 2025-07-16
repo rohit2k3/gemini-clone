@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Gemini Frontend Clone - Kuvaka Tech",
   description: "A conversational AI chat application",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
