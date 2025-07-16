@@ -1,35 +1,26 @@
+"use client"
+
 import type React from "react";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Sidebar from "@/components/dashboard/sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Gemini Frontend Clone - Kuvaka Tech",
-  description: "A conversational AI chat application",
-  generator: "v0.dev",
-};
-
-export default function RootLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  
+  // Extract chat ID from pathname like /dashboard/chat/[id]
+  const chatId = pathname.includes('/chat/') ? pathname.split('/chat/')[1] : '';
+  
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`flex h-screen overflow-hidden ${inter.className}`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Sidebar params={Promise.resolve({ id: "some-chat-id" })} />
-        </ThemeProvider>
-        <main className="flex-1 overflow-y-auto">{children}</main>
-      </body>
-    </html>
+    <div className={`flex h-screen overflow-hidden ${inter.className}`}>
+      <Sidebar params={Promise.resolve({ id: chatId })} />
+      <main className="flex-1 overflow-y-auto">{children}</main>
+    </div>
   );
 }

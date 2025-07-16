@@ -3,20 +3,15 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Send, Moon, Sun, Paperclip, Menu, Edit3, Search, MoreVertical } from "lucide-react"
-import { useTheme } from "next-themes"
+import { MoreVertical, Paperclip, Send } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useChatStore } from "@/lib/stores/chat-store"
 import { useAuthStore } from "@/lib/stores/auth-store"
 import { generateAIResponse, simulateTypingDelay } from "@/lib/utils/ai-responses"
 import { useToast } from "@/hooks/use-toast"
-import { useDebounce } from "@/hooks/use-debounce"
 import MessageBubble from "./message-bubble"
 import TypingIndicator from "./typing-indicator"
 import MessageSkeleton from "./message-skeleton"
-import CreateChatroomDialog from "../dashboard/create-chatroom-dialog"
-import ChatOptionsMenu from "./chat-options-menu"
 
 interface ChatInterfaceProps {
   chatId: string
@@ -28,19 +23,14 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [hasMoreMessages, setHasMoreMessages] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
   const { toast } = useToast()
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
 
   const {
     chatrooms,
@@ -49,21 +39,15 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
     addMessage,
     setTyping,
     getChatMessages,
-    createChatroom,
-    deleteChatroom,
-    setSearchQuery: setChatSearchQuery,
-    getFilteredChatrooms,
+    initializeData,
   } = useChatStore()
 
   const currentChatroom = chatrooms.find((room) => room.id === chatId)
   const chatMessages = getChatMessages(chatId, page)
 
-  // Set search query
   useEffect(() => {
-    setChatSearchQuery(debouncedSearchQuery)
-  }, [debouncedSearchQuery, setChatSearchQuery])
-
-  const filteredChatrooms = getFilteredChatrooms()
+    initializeData()
+  }, [initializeData])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -170,39 +154,6 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
     reader.readAsDataURL(file)
   }
 
-  const handleCreateChatroom = (title: string) => {
-    const chatroomId = createChatroom(title)
-    setIsCreateDialogOpen(false)
-
-    toast({
-      title: "Chat created",
-      description: `"${title}" is ready to use.`,
-    })
-
-    router.push(`/chat/${chatroomId}`)
-  }
-
-  const handleDeleteChatroom = (id: string, title: string) => {
-    deleteChatroom(id)
-    toast({
-      title: "Chat deleted",
-      description: `"${title}" has been removed.`,
-    })
-
-    // If we're deleting the current chat, redirect to dashboard
-    if (id === chatId) {
-      router.push("/dashboard")
-    }
-  }
-
-  const handleLogout = () => {
-    logout()
-    toast({
-      title: "Signed out",
-      description: "You've been signed out of Gemini.",
-    })
-  }
-
   if (!currentChatroom) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -231,15 +182,6 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden w-10 h-10 rounded-full"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-
                 <div className="flex items-center gap-3">
                   <div className="gemini-logo w-8 h-8"></div>
                   <div>
@@ -374,21 +316,6 @@ export default function ChatInterface({ chatId }: ChatInterfaceProps) {
           </div>
         </div>
       </div>
-
-      {/* Create Chatroom Dialog */}
-      <CreateChatroomDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onCreateChatroom={handleCreateChatroom}
-      />
-
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   )
 }

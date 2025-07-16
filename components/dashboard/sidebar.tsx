@@ -138,9 +138,11 @@ const Sidebar = ({ params }: { params: Promise<{ id: string }> }) => {
                   <div
                     key={chatroom.id}
                     className={`p-4 rounded-xl cursor-pointer transition-all group relative ${
-                      chatroom.id === unwrappedParams.id ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/30"
+                      chatroom.id === unwrappedParams.id 
+                        ? "bg-primary/10 border border-primary/20" 
+                        : "hover:bg-muted/30"
                     }`}
-                    onClick={() => router.push(`dashboard/chat/${chatroom.id}`)}
+                    onClick={() => router.push(`/dashboard/chat/${chatroom.id}`)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">

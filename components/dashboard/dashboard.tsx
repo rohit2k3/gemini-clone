@@ -2,54 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  LogOut,
-  Search,
-  MessageCircle,
-  Moon,
-  Sun,
-  Menu,
-  Edit3,
-} from "lucide-react";
-import { useTheme } from "next-themes";
+import { Edit3 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChatStore } from "@/lib/stores/chat-store";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useDebounce } from "@/hooks/use-debounce";
 import CreateChatroomDialog from "./create-chatroom-dialog";
-import ChatOptionsMenu from "../chat/chat-options-menu";
-import Sidebar from "./sidebar";
 
 export default function Dashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const {
-    chatrooms,
     createChatroom,
-    deleteChatroom,
-    setSearchQuery: setChatSearchQuery,
-    getFilteredChatrooms,
     initializeData,
   } = useChatStore();
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
     initializeData();
   }, [initializeData]);
-
-  useEffect(() => {
-    setChatSearchQuery(debouncedSearchQuery);
-  }, [debouncedSearchQuery, setChatSearchQuery]);
-
-  const filteredChatrooms = getFilteredChatrooms();
 
   const handleCreateChatroom = (title: string) => {
     const chatroomId = createChatroom(title);
@@ -63,22 +36,6 @@ export default function Dashboard() {
     router.push(`dashboard/chat/${chatroomId}`);
   };
 
-  const handleDeleteChatroom = (id: string, title: string) => {
-    deleteChatroom(id);
-    toast({
-      title: "Chat deleted",
-      description: `"${title}" has been removed.`,
-    });
-  };
-
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Signed out",
-      description: "You've been signed out of Gemini.",
-    });
-  };
-
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -86,11 +43,9 @@ export default function Dashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background">
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        
-
         {/* Welcome Screen */}
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-2xl text-center">
