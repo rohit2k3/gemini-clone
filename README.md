@@ -1,7 +1,6 @@
 # 🌟 Gemini Frontend Clone
 
 <div align="center">
-  <img src="public/placeholder-logo.svg" alt="Gemini Clone Logo" width="120" height="120">
   
   <h3>A modern, responsive AI chat application inspired by Google Gemini</h3>
   
